@@ -1,0 +1,57 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Clone Codebase') {
+            steps {
+                echo 'Starting to clone codebase from github.com'
+                git branch: 'main', url: 'https://github.com/infinitymasters/java-springboot-system-health-monitoring.git'
+                echo 'Finished cloning codebase successfully'
+            }
+        }
+        stage('Navigating to Target') {
+            steps {
+                echo 'Check Target directory & files'
+                sh 'pwd'
+                sh 'ls'
+            }
+        }
+        stage('Generate Build') {
+            steps {
+                echo 'Starting to generate gradle build'
+                sh './gradlew clean build'
+                echo 'Generated build successfully'
+            }
+        }
+        stage('Generate Docker Image') {
+            steps {
+                echo 'Starting to generate Docker Image'
+                sh 'sudo docker build -t health-monitoring-system:v1.0 .'
+                echo 'Docker Image is successfully generated'
+            }
+        }
+        stage('Verify Docker Images') {
+            steps {
+                echo 'Checking Available Docker Images'
+                sh 'sudo docker images'
+            }
+        }
+        stage('Login to DockerHub') {
+            steps {
+                echo 'Logging into Docker hub'
+                withCredentials([usernamePassword(credentialsId: 'dockerHub', passwordVariable: 'dockerhub_userPassword', usernameVariable: 'dockerhub_userName')]) {
+                    echo 'Logged into DockerHub'
+                    sh 'sudo docker login -u $dockerhub_userName -p $dockerhub_userPassword'
+                    sh 'sudo docker tag health-monitoring-system:v1.0 sdevops24/health-monitoring-system'
+                    sh 'sudo docker push sdevops24/health-monitoring-system'
+                }
+                
+            }
+        }
+        stage('Runing Application') {
+            steps {
+                sh 'sudo docker run -d -p 8085:8080 health-monitoring-system:v1.0'
+            }
+        }
+    }
+}
