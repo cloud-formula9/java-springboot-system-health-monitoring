@@ -1,11 +1,11 @@
 version: '3.7'
 services:
-  health-system:
-    image: sdevops/health-system:v3
-    container_name: health-system
-    ports:
-      - 8080:8080
-    pull_policy: never
+#  health-system:
+#    image: sdevops/health-system:v3
+#    container_name: health-system
+#    ports:
+#      - 8080:8080
+#    pull_policy: never
 
   prometheus:
     image: prom/prometheus:v2.44.0
@@ -13,7 +13,7 @@ services:
     ports:
       - "9090:9090"
     volumes:
-      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml prom/prometheus
+      - ./prometheus/prometheus.yaml:/etc/prometheus/prometheus.yaml
 
   grafana:
     image: grafana/grafana:9.5.2
