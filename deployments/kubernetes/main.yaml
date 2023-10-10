@@ -1,0 +1,41 @@
+# Pod, Deployment, Service configurations
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: health-system-deployment
+  labels:
+    app: health-monitoring-system
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: health-monitoring-system
+  template:
+    metadata:
+      labels:
+        app: health-monitoring-system
+    spec:
+      containers:
+        - name: health-system-container
+          image: sdevops24/health-monitor-system
+          ports:
+            - containerPort: 8080
+              name: health-svc
+---
+# Defines Service version
+apiVersion: v1
+# Defines k8s object
+kind: Service
+# Name fo the service
+metadata:
+  name: health-system-service
+spec:
+  selector:
+    app: health-monitoring-system
+  ports:
+    - name: health-system
+      #      Service port
+      protocol: TCP
+      port: 80
+      #      Redirection port
+      targetPort: health-svc
